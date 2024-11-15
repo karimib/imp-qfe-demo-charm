@@ -41,11 +41,16 @@ def generate_matrix_Lk(p, k, group):
     for i in range(k):
         matrix[k][i] = 1
     vector[k] = (-1) % p  # Sicherstellen, dass -1 modulo p korrekt ist
-    
+
+    # Überprüfung: A^T * a = 0 mod p
+    for col in range(k):
+        assert sum(matrix[row][col] * vector[row] for row in range(k+1)) % p == 0, "Fehler: A^T*a != 0"
+
     logging.debug(f"Generierte Matrix A: {matrix}")
     logging.debug(f"Generierter Vektor a: {vector}")
     
     return matrix, vector
+
 
 ## Generates Matrices A, B <- Z_p^(k+1)xk and vectors a, b <- Z_p^(k+1) such that A^T*a=B^T*b = 0 and b^T*a=1
 def generate_matrix_Lk_AB(p, k, group):
@@ -76,14 +81,15 @@ def generate_matrix_Lk_AB(p, k, group):
 
 
 # Initialisieren der Mock-Gruppe
-group = MockGroup(p=101) 
+group = MockGroup(p=7) 
 
 # Set p to die tatsächliche Gruppenordnung
 p = group.p
 logging.info(f"Gruppenordnung (p): {p}")
 
+
 # Parameters
-k = 12    # Parameter zur Generierung von D-k Matrizen
+k = 6    # Parameter zur Generierung von D-k Matrizen
 m = 3
 n = 2
 
@@ -301,6 +307,7 @@ def qfe(p, k, group):
         logging.info(f"Exponentenfaktor: {exponent_factor}")
         
         while (D != res and v < 100000):  # Begrenzung auf 100.000 Versuche
+            assert group.is_valid(D), "Ungültiges Gruppenelement D"
             try:
                 # Berechnung des Exponenten: v * (b^T * a)
                 current_exponent = (v * exponent_factor) % p  # Beide sind Integers
