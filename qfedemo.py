@@ -35,16 +35,21 @@ def generate_matrix_Lk(p, k, group):
             inv_val = modular_inverse(val, p)
             vector[i] = inv_val
         except ValueError:
-            logging.error(f"Inverse existiert nicht für val={val} und p={p}")
+            logging.error(f"Inverse existiert nicht fuer val={val} und p={p}")
             raise
     
     for i in range(k):
         matrix[k][i] = 1
     vector[k] = (-1) % p  # Sicherstellen, dass -1 modulo p korrekt ist
 
-    # Überprüfung: A^T * a = 0 mod p
+    assert len(matrix) == k + 1, "Matrix hat nicht die erwartete Anzahl von Zeilen."
+    assert len(matrix[0]) == k, "Matrix hat nicht die erwartete Anzahl von Spalten."
+    assert len(vector) == k + 1, "Vektor hat nicht die erwartete Laenge."
+    assert vector[i] > 0, f"Inverse fuer Matrix[{i}][{i}] konnte nicht berechnet werden."
     for col in range(k):
-        assert sum(matrix[row][col] * vector[row] for row in range(k+1)) % p == 0, "Fehler: A^T*a != 0"
+        assert sum(matrix[row][col] * vector[row] for row in range(k + 1)) % p == 0, \
+            f"A^T * a ist nicht 0 fuer Spalte {col}."
+
 
     logging.debug(f"Generierte Matrix A: {matrix}")
     logging.debug(f"Generierter Vektor a: {vector}")
@@ -70,6 +75,12 @@ def generate_matrix_Lk_AB(p, k, group):
         if attempts > 1000000:
             raise ValueError("Zu viele Versuche, Matrizen A und B zu generieren, sodass b^T * a = 1 mod p")
     
+    assert len(A) == k + 1 and len(A[0]) == k, "Matrix A hat falsche Dimensionen."
+    assert len(a) == k + 1, "Vektor a hat falsche Laenge."
+    assert len(B) == k + 1 and len(B[0]) == k, "Matrix B hat falsche Dimensionen."
+    assert len(b) == k + 1, "Vektor b hat falsche Laenge."
+    assert dot_product == 1, "Dot-Produkt von a und b ist nicht 1."
+
     logging.debug(f"Generierte Matrix A: {A}")
     logging.debug(f"Generierter Vektor a: {a}")
     logging.debug(f"Generierte Matrix B: {B}")
@@ -81,15 +92,15 @@ def generate_matrix_Lk_AB(p, k, group):
 
 
 # Initialisieren der Mock-Gruppe
-group = MockGroup(p=7) 
+group = MockGroup(p=13) 
 
-# Set p to die tatsächliche Gruppenordnung
+# Set p to die tatsaechliche Gruppenordnung
 p = group.p
-logging.info(f"Gruppenordnung (p): {p}")
+logging.info(f"Gruppenordnung (p): {101}")
 
 
 # Parameters
-k = 6    # Parameter zur Generierung von D-k Matrizen
+k = 12    # Parameter zur Generierung von D-k Matrizen
 m = 3
 n = 2
 
@@ -100,9 +111,11 @@ def qfe(p, k, group):
         random.seed(42)
         
         # Generate random elements (each element of a group is also a generator)
-        logging.info("Generiere zufällige Gruppenelemente g1 und g2")
+        logging.info("Generiere zufaellige Gruppenelemente g1 und g2")
         g1 = group.random(group.G1)
         g2 = group.random(group.G2)
+        assert group.is_valid(g1), "g1 ist kein gueltiges Gruppenelement."
+        assert group.is_valid(g2), "g2 ist kein gueltiges Gruppenelement."
         logging.info(f"g1: {g1}")
         logging.info(f"g2: {g2}")
         logging.info(f"Typ von g1: {type(g1)}")
@@ -110,6 +123,7 @@ def qfe(p, k, group):
         
         # Korrekte Paarung
         pairing_result = group.pair_prod([g1], [g2])  # Paarungsergebnis als separates Element
+        assert group.is_valid(pairing_result), "Pairing-Result ist kein gueltiges Gruppenelement."
         logging.info(f"pairing_result (e(g1, g2)): {pairing_result}")
         logging.info(f"Typ von pairing_result: {type(pairing_result)}")
         
@@ -119,6 +133,9 @@ def qfe(p, k, group):
         AT_a = [sum([A[row][col] * a[row] for row in range(k+1)]) % p for col in range(k)]
         BT_b = [sum([B[row][col] * b[row] for row in range(k+1)]) % p for col in range(k)]
         bT_a = sum([b[i] * a[i] for i in range(k+1)]) % p
+        assert all(value == 0 for value in AT_a), "A^T * a ist nicht ueberall 0."
+        assert all(value == 0 for value in BT_b), "B^T * b ist nicht ueberall 0."
+        assert bT_a == 1, "b^T * a ist nicht 1."
         logging.info(f"A^T * a mod p: {AT_a}")
         logging.info(f"B^T * b mod p: {BT_b}")
         logging.info(f"b^T * a mod p: {bT_a}")
@@ -126,6 +143,8 @@ def qfe(p, k, group):
         # Generieren von r und s
         r = [[random.randint(0, p-1) for _ in range(k)] for _ in range(n)]
         s = [[random.randint(0, p-1) for _ in range(k)] for _ in range(m)]
+        assert len(r) == n and all(len(row) == k for row in r), "Matrix r hat falsche Dimensionen."
+        assert len(s) == m and all(len(row) == k for row in s), "Matrix s hat falsche Dimensionen."
         logging.info(f"r: {r}")
         logging.info(f"s: {s}")
         logging.info(f"Form von r: {len(r)}x{len(r[0])}")
@@ -145,8 +164,9 @@ def qfe(p, k, group):
         ## KEYGEN
         logging.info("KEYGEN")
         u = random.randint(1, p-1)
-        # F ist eine Matrix in Z_p^(n x m). Hier ein Beispiel mit zufälligen Werten:
+        # F ist eine Matrix in Z_p^(n x m). Hier ein Beispiel mit zufaelligen Werten:
         F = [[random.randint(0, p-1) for _ in range(m)] for _ in range(n)]
+        assert len(F) == n and all(len(row) == m for row in F), "Matrix F hat falsche Dimensionen."
         logging.info(f"u: {u}")
         logging.info(f"F: {F}")
         logging.info(f"Form von F: {len(F)}x{len(F[0])}")
@@ -185,8 +205,8 @@ def qfe(p, k, group):
         try:
             exponent_K = (sum_zr.value - u_zr.value) % p
             logging.info(f"exponent_K: {exponent_K}")
-            K = group.pair_prod([g1 ** exponent_K], [g2])       # Paarungsergebnis für K
-            K_tilde = group.pair_prod([g1], [g2 ** u_zr.value])  # Paarungsergebnis für K_tilde
+            K = group.pair_prod([g1 ** exponent_K], [g2])       # Paarungsergebnis fuer K
+            K_tilde = group.pair_prod([g1], [g2 ** u_zr.value])  # Paarungsergebnis fuer K_tilde
             logging.info(f"K: {K.value}")
             logging.info(f"K_tilde: {K_tilde.value}")
             logging.info(f"Typ von K: {type(K)}")
@@ -196,8 +216,8 @@ def qfe(p, k, group):
             traceback.print_exc()
             raise ve
         
-        skF = (K, K_tilde)  # Secret Key für F
-        logging.info(f"Secret Key für F (skF): {skF}")
+        skF = (K, K_tilde)  # Secret Key fuer F
+        logging.info(f"Secret Key fuer F (skF): {skF}")
           
         ## ENCRYPT
         logging.info("ENCRYPT")
@@ -235,7 +255,8 @@ def qfe(p, k, group):
                 sum_a_y = (a[j] * y[j]) % p
                 c_tilde_val = (sum_B_s + sum_a_y) % p
                 c_tilde.append(c_tilde_val)
-            
+            assert len(c) == n, "Vektor c hat falsche Laenge."
+            assert len(c_tilde) == m, "Vektor c_tilde hat falsche Laenge."
             logging.info(f"c: {c}")
             logging.info(f"c_tilde: {c_tilde}")
         except Exception as e:
@@ -245,7 +266,8 @@ def qfe(p, k, group):
         
         ## DECRYPT
         logging.info("DECRYPT")
-        D = group.init(group.GT, 1)  # Initialisierung von D als Identitätselement in GT
+        D = group.init(group.GT, 1)  # Initialisierung von D als Identitaetselement in GT
+        assert group.is_valid(D), "D ist kein gueltiges Gruppenelement."
         logging.info(f"Initialisiertes D: {D.value}")
         logging.info(f"Typ von D: {type(D)}")
         
@@ -253,7 +275,7 @@ def qfe(p, k, group):
             for j in range(m):
                 # Berechnung des Exponenten: F[i][j] + c[i] * c_tilde[j]
                 exponent = (F[i][j] + (c[i] * c_tilde[j])) % p  # Verwenden Sie eine einfache Multiplikation
-                logging.info(f"Exponent für D *= gt^{exponent}: {exponent}")
+                logging.info(f"Exponent fuer D *= gt^{exponent}: {exponent}")
                 
                 # Konvertieren des Exponenten zu einem ZR-Element
                 exponent_zr = group.init(group.ZR, exponent)
@@ -285,6 +307,7 @@ def qfe(p, k, group):
             # Multiplikation mit den Inversen
             D_before = D.value
             D = D * inverse_K
+            assert group.is_valid(D), "D ist kein gueltiges Gruppenelement."
             logging.info(f"D vor Multiplikation mit inverse_K: {D_before}")
             logging.info(f"D nach Multiplikation mit inverse_K: {D.value}")
             
@@ -301,13 +324,13 @@ def qfe(p, k, group):
             raise e
         
         # Suche nach v, sodass [v * (b^T * a)]_T = D
-        res = group.init(group.GT, 1)  # Start mit dem Identitätselement
+        res = group.init(group.GT, 1)  # Start mit dem Identitaetselement
         v = 0
         exponent_factor = sum([b[i] * a[i] for i in range(k+1)]) % p
         logging.info(f"Exponentenfaktor: {exponent_factor}")
         
         while (D != res and v < 100000):  # Begrenzung auf 100.000 Versuche
-            assert group.is_valid(D), "Ungültiges Gruppenelement D"
+            assert group.is_valid(D), "Ungueltiges Gruppenelement D"
             try:
                 # Berechnung des Exponenten: v * (b^T * a)
                 current_exponent = (v * exponent_factor) % p  # Beide sind Integers
@@ -317,12 +340,13 @@ def qfe(p, k, group):
                 # Berechnung von group.gt^current_exponent_zr
                 res_before = res.value
                 res = group.gt ** current_exponent_zr
+                assert group.is_valid(res), f"Zwischenergebnis res ist kein gueltiges Gruppenelement bei v={v}."
                 logging.info(f"res vor Multiplikation: {res_before}")
                 logging.info(f"res nach Exponentiation: {res.value}")
                 logging.info(f"Typ von res: {type(res)}")
                 v += 1
             except Exception as e:
-                logging.error(f"Fehler bei der Berechnung von res für v={v}: {e}")
+                logging.error(f"Fehler bei der Berechnung von res fuer v={v}: {e}")
                 traceback.print_exc()
                 raise e
         
@@ -340,9 +364,11 @@ def qfe(p, k, group):
         logging.error(f"Fehler bei QFE: {e}")
         traceback.print_exc()
 
+
 if __name__ == "__main__":
     try:
         qfe(p, k, group)
+
     except Exception as e:
         logging.error(f"Fehler bei QFE: {e}")
         traceback.print_exc()

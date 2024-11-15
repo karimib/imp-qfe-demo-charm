@@ -76,7 +76,7 @@ class MockGroup:
         self.G1 = 'G1'
         self.G2 = 'G2'
         self.GT = 'GT'
-        self.gt = MockElement(self, 2, self.GT)
+        self.gt = MockElement(self, 12, self.GT)
 
     @staticmethod
     def is_prime(num):
