@@ -3,55 +3,28 @@ import math
 import numpy as np
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT
 from charm.core.math.pairing import pair
+from qfehelpers import matrix_vector_dot, inner_product_mod, transpose_matrix, random_int_matrix, random_vector, generate_matrix_Lk, vector_matrix_dot_mod, transpose_vector, compute_rT_AT_for_row
+
 
 
 ######################################## HELPERS ######################################################################
 
-def extended_gcd(a, b):
-    if a == 0:
-        return b, 0, 1
-    gcd, x1, y1 = extended_gcd(b % a, a)
-    x = y1 - (b // a) * x1
-    y = x1
-    return gcd, x, y
+# def extended_gcd(a, b):
+#     if a == 0:
+#         return b, 0, 1
+#     gcd, x1, y1 = extended_gcd(b % a, a)
+#     x = y1 - (b // a) * x1
+#     y = x1
+#     return gcd, x, y
 
-def modular_inverse(a, m):
-    gcd, x, _ = extended_gcd(a, m)
-    if gcd != 1:
-        raise ValueError("Inverse does not exist")
-    else:
-        return x % m
-
-
+# def modular_inverse(a, m):
+#     gcd, x, _ = extended_gcd(a, m)
+#     if gcd != 1:
+#         raise ValueError("Inverse does not exist")
+#     else:
+#         return x % m
 
 
-## Generates a Matrix A <- Z_p^(k+1)xk and a vector a <_ Z_p^k such that A^T*a = 0
-def generate_matrix_Lk(p, k):
-    matrix = np.zeros((k+1, k))
-    vector = np.zeros(k+1)
-    
-    for i in range(k):
-        val = np.random.randint(1, p)
-        matrix[i][i] = val
-        vector[i] = modular_inverse(val, p)
-    
-    matrix[k] = np.ones(k)
-    vector[k] = -1
-    
-    return np.array(matrix), np.array(vector)
-
-## Generates Matrices A, B <- Z_p^(k+1)xk and vertices a,b <- Z_p^(k+1) such that A^T*a=B^T*b = 0 and b^T*a=1 
-# TODO: => b^T*a can be 1 but can also be any other int.
-def generate_matrix_Lk_AB(p, k):
-    A, a = generate_matrix_Lk(p, k)
-    B = np.zeros((k+1, k))
-    b = np.zeros(k+1)
-
-    while((b.T @ a) % p != 1):
-        B,b = generate_matrix_Lk(p,k)
-        
-    
-    return np.array(A), np.array(a), np.array(B), np.array(b)
 
 ######################################## PARAMETERS ###################################################################
 
@@ -75,10 +48,12 @@ print("Group order: ", group.order())
 # TODO: Find p > mnB_xB_yB_f where M: {0,...,B_x}^n x {0,...B_y}^m and K:={0,..,B_f}^nxm to efficiently compute dlog P8,9 QFE Paper
 # TODO: BM: Maybe do benchmarks over different sizes of p
 # TODO: Outsource parameters in files
-p = 797 # prime for group Z_p
+#p = group.order() # prime for group Z_p
+p = group.order()
 k = 3 # parameter for generation of D-k matrices
 m = 3
 n = 2
+
 
 ######################################## ALGORITHM ####################################################################
 
@@ -108,20 +83,22 @@ def qfe(p, k):
     # TODO: Add random samling of matrices -> Use this paper, P11, https://eprint.iacr.org/2015/409.pdf
     # A,B <- Z_p^(k+1) x k
     # a,b <- Z_p^(k+1)
-    A, a, B, b  = generate_matrix_Lk_AB(p, k)
-    print("A.T*a", np.dot(A.T, a) % p)
-    print("B.T*b", np.dot(B.T, b) % p)
-    print("b.T*a", np.dot(b.T, a) % p)
+    A, a = generate_matrix_Lk(p, k)
+    B, b  = generate_matrix_Lk(p, k)
+    print("A.T*a", matrix_vector_dot(transpose_matrix(A), a, p))
+    print("B.T*b", matrix_vector_dot(transpose_matrix(B), b, p))
+    print("b.T*a", inner_product_mod(b, a, p))
     
     # r_i, s_j <- Z_p^k
     # TODO: Add random sampling of r and s
-    #r = np.random.randint(0, p, size=(n, k)) 
-    #s = np.random.randint(0, p, size=(m, k)) 
-    r = np.random.randint(1, 2, size=(n, k))
-    s = np.random.randint(1, 2, size=(m, k))
+    #r = np.random.randint(0, 2, size=(n, k)) 
+    #s = np.random.randint(0, 2, size=(m, k)) 
+    r = random_int_matrix(1, 2, n, k)
+    s = random_int_matrix(1, 2, m, k)
+
 
     # master public key (TODO: is this always gt^1 ?)
-    mpk = gt ** int(np.dot(b.T, a))
+    mpk = gt ** int(inner_product_mod(b, a, p))
     # master secret key
     msk = (A, a, B, b, r, s) 
         
@@ -136,8 +113,8 @@ def qfe(p, k):
     ## KEYGEN
     print("KEYGEN")
     # We assume multiplicative groups
-    u = np.random.randint(1, p)
-    F = np.random.randint(1, 2, size=(n, m)) # F <- Z_p^(n x m) TODO: parameterize
+    u = random.randint(1, 1)
+    F = random_int_matrix(1, 2, n, m) # F <- Z_p^(n x m) TODO: parameterize
 
     print("u: ", u)
     print("F: ", F)
@@ -145,11 +122,16 @@ def qfe(p, k):
     u = 1 # TODO: Remove this line
     sum = 0
     for i in range(n):
+        print("r[i]: ", r[i])
+        A = np.array(A)
+        r = np.array(r)
+        riT_AT = np.dot(r[i].T, A.T)
         for j in range(m):
-            print("r[i]: ", r[i].T)
-            print("A: ", A.T)
-            sum += (F[i][j] * np.dot(np.dot(np.dot(r[i].T, A.T), B), s[j]))
+            riT_AT_B = np.dot(riT_AT, B)
+            riT_AT_B_sj = np.dot(riT_AT_B, s[j])
+            sum += (F[i][j] * riT_AT_B_sj)
     
+
     print("sum: ", sum)
     print("u: ", u)
 
@@ -167,8 +149,8 @@ def qfe(p, k):
     # TODO: Parameterize
     #x = np.random.randint(1, p, size=n) # x <- Z_p^n
     #y = np.random.randint(1, p, size=m) # y <- Z_p^m
-    x = np.random.randint(1, 2, size=n)
-    y = np.random.randint(1, 2, size=m)
+    x = random_vector(1, 2, n)
+    y = random_vector(1, 2, m)
     print("x :", x)
     print("y :", y)
     
@@ -201,12 +183,17 @@ def qfe(p, k):
     # Find v such that [v * (b.T)*a]_T = D
     res = group.random(GT)
     v = 0
+    b = np.array(b)
+    a = np.array(a)
     while (D != res and v < 7):
         res = gt ** int(v * (np.dot(b.T,a)))
         v += 1
 
     print("D: ", D)
     print("res: ", res)
+    x = np.array(x)
+    y = np.array(y)
+    F = np.array(F)
     print("expected result: ", np.dot(np.dot(x.T,F), y))
     print("calculated result: ", v)
     
@@ -215,6 +202,7 @@ def qfe(p, k):
 
 
 qfe(p, k)
+
 
 
 #######################################################################################################################

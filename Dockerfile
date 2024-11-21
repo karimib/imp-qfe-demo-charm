@@ -6,8 +6,17 @@ RUN wget https://crypto.stanford.edu/pbc/files/pbc-0.5.14.tar.gz && tar xvf pbc-
 COPY ./ext /charm
 RUN cd /charm && ./configure.sh && make && make install && ldconfig
 
-from base as final 
-COPY ./qfedemo.py .
 
+from base as testing 
+COPY ./qfehelpers.py .
+COPY ./test_qfehelpers.py .
+RUN python3 test_qfehelpers.py
+
+from testing as final 
+COPY ./qfepuredemo.py .
+
+#from base as final
+#COPY ./qfedemo.py .
 # Festlegen des Startbefehls
-CMD ["python3", "qfedemo.py"]
+CMD ["python3", "qfepuredemo.py"]
+#CMD ["python3", "qfedemo.py"]
