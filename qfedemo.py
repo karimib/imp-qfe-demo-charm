@@ -2,6 +2,7 @@ import random
 import math
 import numpy as np
 from charm.toolbox.pairinggroup import PairingGroup,ZR,G1,G2,GT
+from charm.core.math.pairing import pair
 
 
 ######################################## HELPERS ######################################################################
@@ -39,7 +40,7 @@ def generate_matrix_Lk(p, k):
     
     return np.array(matrix), np.array(vector)
 
-## Generates Matrices A, B <- Z_p^(k+1)xk and vertices a,b <- Z_p^(k+1) such that A^T*a=B^T*b = 0 and b^T*a=1
+## Generates Matrices A, B <- Z_p^(k+1)xk and vertices a,b <- Z_p^(k+1) such that A^T*a=B^T*b = 0 and b^T*a=1 => b^T*a can be one but can also be any.
 def generate_matrix_Lk_AB(p, k):
     A, a = generate_matrix_Lk(p, k)
     B = np.zeros((k+1, k))
@@ -132,24 +133,24 @@ def qfe(p, k):
     ## KEYGEN
     print("KEYGEN")
     # We assume multiplicative groups
-    u = np.random.randint(1, p) 
+    u = np.random.randint(1, p)
     F = np.random.randint(1, 2, size=(n, m)) # F <- Z_p^(n x m) TODO: parameterize
 
     print("u: ", u)
     print("F: ", F)
     
+    u = 1 # TODO: Remove this line
     sum = 0
     for i in range(n):
         for j in range(m):
             sum += (F[i][j] * np.dot(np.dot(np.dot(r[i].T, A.T), B), s[j]))
     
-    sum %= p
-    sum = group.init(ZR, sum)
-    u = group.init(ZR, u)
     print("sum: ", sum)
-    K = group.pair_prod(g1 ** (sum - u), g2)
-    K_tilde = group.pair_prod(g1,g2 ** u)
-    
+    print("u: ", u)
+
+    K = g1 ** int(sum - u)
+    K_tilde = g2 ** int(u)
+            
     skF = (K, K_tilde) # secret key for F
     
     print("K: ", K)
@@ -166,8 +167,8 @@ def qfe(p, k):
     print("y :", y)
     
     # Compute c and c_tilde
-    c = [np.mod(np.dot(A, r[i]) + np.dot(b, x[i]),p)for i in range(n)]
-    c_tilde = [np.mod(np.dot(B, s[j]) + np.dot(a, y[j]),p) for j in range(m)]
+    c = [np.dot(A, r[i]) + np.dot(b, x[i]) for i in range(n)]
+    c_tilde = [np.dot(B, s[j]) + np.dot(a, y[j]) for j in range(m)]
     
     #c = np.vectorize(lambda x: g1 ** int(x))(c)
     #c_tilde = np.vectorize(lambda x: g2 ** int(x))(c_tilde)
@@ -179,18 +180,18 @@ def qfe(p, k):
 
     ## DECRYPT
     print("DECRYPT")
-    D = res = group.random(GT)
+    D = group.random(GT)
     for i in range(n):
         for j in range(m):
             # TODO: Q: Is this computation correct ? e(c_i, c_tilde_j) = gt ** <c_i,c_tilde_j>
             print("c[i] :", c[i])
             print("c[j] :", c_tilde[j])
             print("dot :", np.dot(c[i], c_tilde[j]))
-            D+= group.init(GT,(int(F[i][j] + int(np.dot(c[i], c_tilde[j])))))
+            D*= gt ** (int(F[i][j] * int(np.dot(c[i], c_tilde[j])))) # D *= e(c_i, c_tilde_j)^F_ij
 
             
-    D -= group.pair_prod(K, g2 ** int(1))
-    D -= group.pair_prod(g1 ** int(1), K_tilde)
+    D *= -(group.pair_prod(K, g2))
+    D *= -(group.pair_prod(g1, K_tilde))
     print("D: ", D)
 
     # Find v such that [v * (b.T)*a]_T = D
@@ -204,7 +205,6 @@ def qfe(p, k):
     print("res: ", res)
     print("expected result: ", np.dot(np.dot(x.T,F), y))
     print("calculated result: ", v)
-    print("g")
     
 
 
