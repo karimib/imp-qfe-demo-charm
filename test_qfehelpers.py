@@ -30,7 +30,6 @@ class TestModularInverse(unittest.TestCase):
         self.assertEqual((a * inverse) % p, 1)  # Check if the modular inverse is valid
 
 
-
 class TestMatrixVectorDot(unittest.TestCase):
     def test_valid_cases(self):
         # Test cases with valid matrix and vector sizes
