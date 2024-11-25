@@ -12,7 +12,8 @@ from qfehelpers import (
     vector_multiply_mod,
     matrix_vector_multiply,
     vector_transposed_mul_matrix_mul_vector,
-    dot_product
+    dot_product,
+    scalar_multiply
 )
 
 
@@ -135,15 +136,15 @@ def qfe(p, k):
     print("ENCRYPT")
     # Input vectors (x,y) <- Z_p^n x Z_p^m
     # TODO: BM: Benchmark over different sizes of x and y
-    x = random_vector(1, 2, n)
+    x = random_vector(1, 3, n)
     y = random_vector(1, 2, m)
     
     print("x :", x)
     print("y :", y)
 
     # Compute c and c_tilde
-    c = [matrix_vector_multiply(A, r[i]) + (b * x[i]) for i in range(n)]
-    c_tilde = [matrix_vector_multiply(B, s[j]) + (a * y[j]) for j in range(m)]
+    c = [matrix_vector_multiply(A, r[i]) + scalar_multiply(b, x[i]) for i in range(n)]
+    c_tilde = [matrix_vector_multiply(B, s[j]) + scalar_multiply(a, y[j]) for j in range(m)]
 
     print("c: ", c)
     print("c_tilde: ", c_tilde)

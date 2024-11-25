@@ -1,5 +1,5 @@
 import unittest
-from qfehelpers import modular_inverse, matrix_vector_dot, inner_product_mod, transpose_matrix, random_int_matrix, random_vector
+from qfehelpers import modular_inverse, matrix_vector_dot, inner_product_mod, transpose_matrix, random_int_matrix, random_vector, matrix_vector_multiply
 
 class TestModularInverse(unittest.TestCase):
     def test_valid_cases(self):
@@ -360,6 +360,52 @@ class TestRandomVector(unittest.TestCase):
         with self.assertRaises(ValueError):
             random_vector(low, high, n)
 
+
+class TestMatrixVectorMultiply(unittest.TestCase):
+    def test_basic_case(self):
+        matrix = [[1, 2], [3, 4]]
+        vector = [5, 6]
+        expected = [17, 39]
+        self.assertEqual(matrix_vector_multiply(matrix, vector), expected)
+
+    def test_larger_matrix(self):
+        matrix = [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+            [10, 11, 12]
+        ]
+        vector = [1, 2, 3]
+        expected = [14, 32, 50, 68]
+        self.assertEqual(matrix_vector_multiply(matrix, vector), expected)
+
+    def test_single_element_case(self):
+        matrix = [[10]]
+        vector = [2]
+        expected = [20]
+        self.assertEqual(matrix_vector_multiply(matrix, vector), expected)
+
+    def test_mismatched_dimensions(self):
+        matrix = [[1, 2, 3], [4, 5, 6]]
+        vector = [1, 2]
+        with self.assertRaises(ValueError) as context:
+            matrix_vector_multiply(matrix, vector)
+        self.assertEqual(
+            str(context.exception),
+            "Number of columns in the matrix must match the length of the vector"
+        )
+
+    def test_zeros(self):
+        matrix = [[0, 0, 0], [0, 0, 0]]
+        vector = [0, 0, 0]
+        expected = [0, 0]
+        self.assertEqual(matrix_vector_multiply(matrix, vector), expected)
+
+    def test_empty_inputs(self):
+        matrix = []
+        vector = []
+        with self.assertRaises(IndexError):
+            matrix_vector_multiply(matrix, vector)
 
 
 if __name__ == "__main__":

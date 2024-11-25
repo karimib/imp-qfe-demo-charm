@@ -406,3 +406,17 @@ def vector_transposed_mul_matrix_mul_vector(x, F, y, p):
     xTFy = sum((x[i] * Fy[i]) % p for i in range(len(x))) % p
 
     return xTFy
+
+
+def scalar_multiply(vector, scalar):
+    """
+    Computes the dot product of two matrices.
+
+    Args:
+        vector (list[float]): The vector .
+        scalar (int): The scalar.
+
+    Returns:
+        list[float]: The resulting vector after multiplication with the scalar.
+    """
+    return [scalar * element for element in vector]
