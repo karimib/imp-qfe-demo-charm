@@ -15,12 +15,12 @@ def vector_multiply_mod(vector1, vector2, p):
     """
     if len(vector1) != len(vector2):
         raise ValueError("Vectors must have the same length")
-    
+
     sum = 0
     for i in range(len(vector1)):
         sum += vector1[i] * vector2[i]
 
-    return  sum % p
+    return sum % p
 
 
 def matrix_multiply_mod(A, B, p):
@@ -207,9 +207,34 @@ def matrix_vector_multiply(matrix, vector):
         list[float]: The resulting vector after multiplication.
     """
     if len(matrix[0]) != len(vector):
-        raise ValueError("Number of columns in the matrix must match the length of the vector")
+        raise ValueError(
+            "Number of columns in the matrix must match the length of the vector"
+        )
 
-    result = [sum(matrix[i][j] * vector[j] for j in range(len(vector))) for i in range(len(matrix))]
+    result = [
+        sum(matrix[i][j] * vector[j] for j in range(len(vector)))
+        for i in range(len(matrix))
+    ]
+    return result
+
+
+def matrix_vector_multiply_mod(matrix, vector, p):
+    """
+    Multiplies a matrix by a vector.
+
+    Args:
+        matrix (list[list[float]]): The input matrix.
+        vector (list[float]): The input vector.
+
+    Returns:
+        list[float]: The resulting vector after multiplication.
+    """
+    if len(matrix[0]) != len(vector):
+        raise ValueError(
+            "Number of columns in the matrix must match the length of the vector"
+        )
+
+    result = matrix_vector_multiply(matrix, vector) % p
     return result
 
 
@@ -233,7 +258,7 @@ def inner_product_mod(vector1, vector2, p):
 
     # Compute the inner product modulo p
     return sum(vector1[i] * vector2[i] for i in range(len(vector1))) % p
-    
+
 
 def transpose_vector(vector):
     """
@@ -267,19 +292,6 @@ def transpose_matrix(matrix):
         [matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))
     ]
     return transposed
-
-
-def transpose_vector(vector):
-    """
-    Transposes a vector (1D list to 2D column vector).
-
-    Args:
-        vector (list): A 1D list representing the vector.
-
-    Returns:
-        list[list]: A 2D list representing the transposed vector (column vector).
-    """
-    return [[element] for element in vector]
 
 
 def random_int_matrix(low, high, n, m):
@@ -360,6 +372,7 @@ def compute_rT_AT_for_row(r_i, A):
     result = [dot_product(r_i, row) for row in A_T]
     return result
 
+
 def matrix_dot_product(A, B):
     """
     Computes the dot product of two matrices.
@@ -383,3 +396,13 @@ def matrix_dot_product(A, B):
     # Compute the dot product
     result = [[dot_product(row, col) for col in B_T] for row in A]
     return result
+
+
+def vector_transposed_mul_matrix_mul_vector(x, F, y, p):
+    # Step 1: Compute F * y (mod p)
+    Fy = matrix_vector_multiply(F, y)
+
+    # Step 2: Compute x^T * (Fy) (mod p)
+    xTFy = sum((x[i] * Fy[i]) % p for i in range(len(x))) % p
+
+    return xTFy
