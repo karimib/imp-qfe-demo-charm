@@ -1,6 +1,54 @@
 import random
 
 
+class MPK:
+    g1 = None
+    g2 = None
+    gt = None
+    baT = None
+
+    def __init__(self, g1, g2, gt, baT):
+        self.g1 = g1
+        self.g2 = g2
+        self.gt = gt
+        self.baT = baT
+
+
+class MSK:
+    A = None
+    a = None
+    B = None
+    b = None
+    r = None
+    s = None
+
+    def __init__(self, A, a, B, b, r, s):
+        self.A = A
+        self.a = a
+        self.B = B
+        self.b = b
+        self.r = r
+        self.s = s
+
+
+class SKF:
+    K = None
+    K_tilde = None
+
+    def __init__(self, K, K_tilde):
+        self.K = K
+        self.K_tilde = K_tilde
+
+
+class CTXY:
+    c = None
+    c_tilde = None
+
+    def __init__(self, c, c_tilde):
+        self.c = c
+        self.c_tilde = c_tilde
+
+
 def vector_multiply_mod(vector1, vector2, p):
     """
     Multiplies two vectors element-wise under modulo p.
