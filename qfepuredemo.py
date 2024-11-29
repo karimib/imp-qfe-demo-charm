@@ -55,13 +55,13 @@ from qfehelpers import (
 # 2. Search curves
 # 3. Search other implementations
 # TODO: Remove after bechmarking
-class QFE():
+class QFE:
     # TODO: Remove after bechmarking
-    group = (None,)
-    p_order = (None,)
-    g1 = (None,)
-    g2 = (None,)
-    gt = (None,)
+    group = None
+    p_order = None
+    g1 = None
+    g2 = None
+    gt = None
 
     # TODO: Remove after bechmarking
     def __init__(self, group, p_order, g1, g2, gt):
@@ -74,7 +74,7 @@ class QFE():
     def get_p_order(self):
         return self.p_order
 
-    def setup(self,p=p_order, k=None):
+    def setup(self, p=p_order, k=None):
         m = k
         n = k - 1
         # Generate random elements (each element of a group is also a generator)
@@ -100,7 +100,7 @@ class QFE():
         msk = MSK(A, a, B, b, r, s)
         return mpk, msk
 
-    def keygen(p=p_order, mpk=None, msk=None, F=None):
+    def keygen(self, p=p_order, mpk=None, msk=None, F=None):
         # Generate random element u <- Z_p
         u = random.randint(0, p - 1)  # u <- Z_p
         # Generate random matrix F <- Z_p^(n x m)
@@ -128,7 +128,7 @@ class QFE():
         skF = SKF(K, K_tilde)  # secret key for F
         return skF
 
-    def encrypt(msk, x, y):
+    def encrypt(self, msk, x, y):
         A = msk.A
         B = msk.B
         a = msk.a
@@ -149,7 +149,9 @@ class QFE():
         CT_xy = CTXY(c, c_tilde)
         return CT_xy
 
-    def decrypt(self,p=p_order, mpk=None, skF=None, CT_xy=None, n=None, m=None, F=None):
+    def decrypt(
+        self, p=p_order, mpk=None, skF=None, CT_xy=None, n=None, m=None, F=None
+    ):
         c = CT_xy.c
         c_tilde = CT_xy.c_tilde
         K = skF.K
@@ -165,7 +167,7 @@ class QFE():
                 exp += int(F[i][j] * int(dot_product(c[i], c_tilde[j])))
 
         D = gt**exp
-        D *= -(self.roup.pair_prod(K, g2))
+        D *= -(self.group.pair_prod(K, g2))
         D *= -(self.group.pair_prod(g1, K_tilde))
 
         # Find v such that [v * (b.T)*a]_T = D
@@ -178,6 +180,6 @@ class QFE():
 
         return v
 
-    def get_expected_result(p=p_order, x=None, F=None, y=None):
+    def get_expected_result(self,p=p_order, x=None, F=None, y=None):
         expected = vector_transposed_mul_matrix_mul_vector(x, F, y, p)
         return expected
