@@ -31,14 +31,18 @@ Create a container from the image
 docker run charmdemo:v1 
 ```
 
+Mount a volume to save benchmark csv
 
+````shell
+docker run -v ${PWD}:/data charmdemo:v1 
+````
 
 ## Notes
-Only quadratic functions that represent billinear forms are supported.
-https://chatgpt.com/share/6749fede-fe00-8004-8f13-5fd2a755ea08
 
+Only quadratic functions that represent billinear forms are supported.
+<https://chatgpt.com/share/6749fede-fe00-8004-8f13-5fd2a755ea08>
 
 Benchmarking
--> First we tried by increasing the k value 
+-> First we tried by increasing the k value
 -> Then we had a look at the graphs and saw that in the beginning there were spikes in the setup and keygen method that we assume are because the group gets initialized new for every new k
--> We tougth about fixing the group and its elements to have a more clear benchmark 
+-> We tougth about fixing the group and its elements to have a more clear benchmark
