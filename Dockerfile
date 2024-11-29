@@ -15,10 +15,11 @@ COPY ./test_qfehelpers.py .
 # Run the tests
 RUN python3 test_qfehelpers.py
 
+#COPY ./qfepuredemo.py .
+#COPY ./test_qfepuredemo.py .
+#RUN python3 test_qfepuredemo.py
+
 FROM testing AS final 
 COPY ./qfepuredemo.py .
-CMD ["python3", "qfepuredemo.py"]
-
-#from base as final
-#COPY ./qfedemo.py .
-#CMD ["python3", "qfedemo.py"]
+COPY ./qfe.py .
+CMD ["python3", "qfe.py"]
