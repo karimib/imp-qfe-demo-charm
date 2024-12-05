@@ -1,5 +1,5 @@
 import time, unittest
-from qfepuredemo import setup, keygen, encrypt, decrypt
+from qfebounded import setup, keygen, encrypt, decrypt
 
 class QFEPureDemoBenchmarkTest(unittest.TestCase):
         def benchmark_method(self, method, *args):

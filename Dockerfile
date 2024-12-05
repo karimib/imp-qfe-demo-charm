@@ -20,6 +20,6 @@ RUN python3 test_qfehelpers.py
 #RUN python3 test_qfepuredemo.py
 
 FROM testing AS final 
-COPY ./qfepuredemo.py .
-COPY ./qfe.py .
-CMD ["python3", "qfe.py"]
+COPY ./qfebounded.py .
+COPY ./benchmark.py .
+CMD ["python3", "benchmark.py"]
