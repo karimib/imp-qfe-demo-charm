@@ -15,10 +15,6 @@ COPY ./test_qfehelpers.py .
 # Run the tests
 RUN python3 test_qfehelpers.py
 
-#COPY ./qfepuredemo.py .
-#COPY ./test_qfepuredemo.py .
-#RUN python3 test_qfepuredemo.py
-
 FROM testing AS final 
 COPY ./qfebounded.py .
 COPY ./benchmark.py .

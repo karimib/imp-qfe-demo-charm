@@ -157,7 +157,7 @@ class QFE:
         K = skF.K
         K_tilde = skF.K_tilde
         g1 = mpk.g1
-        g2 = mpk.g2
+        g2 = mpk.g2 
         gt = mpk.gt
 
         D = self.group.random(GT)
