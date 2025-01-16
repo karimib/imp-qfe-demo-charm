@@ -468,3 +468,19 @@ def scalar_multiply(vector, scalar):
         list[float]: The resulting vector after multiplication with the scalar.
     """
     return [scalar * element for element in vector]
+
+
+def size_in_kilobits(parameter):
+    """
+    Calculate the size of a parameter in kilobits.
+
+    Args:
+    parameter: The parameter whose size is to be calculated
+
+    Returns:
+    float: Size of the parameter in kilobits
+    """
+    size_in_bytes = sys.getsizeof(parameter)
+    size_in_bits = size_in_bytes * 8
+    size_in_kilobits = size_in_bits / 1024
+    return size_in_kilobits

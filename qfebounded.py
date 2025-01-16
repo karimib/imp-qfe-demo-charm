@@ -157,7 +157,7 @@ class QFE:
         K = skF.K
         K_tilde = skF.K_tilde
         g1 = mpk.g1
-        g2 = mpk.g2 
+        g2 = mpk.g2
         gt = mpk.gt
 
         D = self.group.random(GT)
@@ -180,6 +180,6 @@ class QFE:
 
         return v
 
-    def get_expected_result(self,p=p_order, x=None, F=None, y=None):
+    def get_expected_result(self, p=p_order, x=None, F=None, y=None):
         expected = vector_transposed_mul_matrix_mul_vector(x, F, y, p)
         return expected

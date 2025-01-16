@@ -1,14 +1,20 @@
-# Implementation of a quadratic functional encryption scheme
+# IMP-QFE
 
 ## Scheme
 
-The scheme described on P. 11 in the following scheme has been implemented
+The following project implements the bounded Quadratic Functional Encryption Scheme as described on p.11 of the following paper
 
 * [Practical Functional Encryption for Quadratic Functions with Applications to Predicate Encryption](https://eprint.iacr.org/2017/151.pdf)
 
+## Structure
+
+* [qfebounded.py](./qfebounded.py) contains the implementation of the scheme
+* [qfehelpers.py](./qfehelpers.py) helper functions used by the scheme
+* [benchmark.py](./benchmark.py) calls the scheme in different ways and provides benchmarks
+
 ## Prerequisites
 
-* Docker or Podman
+* Docker or Podman (if using podman replace the "docker" with "podman" in the instructions below)
 
 ## Usage
 
@@ -22,27 +28,17 @@ cd imp-qfe-demo-charm
 Build the image (assuming your in the root directory)
 
 ```shell
-docker build -t charmdemo:v1 .
+docker build -t qfedemo:v1 .
 ```
 
 Create a container from the image
 
 ```shell
-docker run charmdemo:v1 
+docker run qfedemo:v1 
 ```
 
 Mount a volume to save benchmark csv
 
 ````shell
-docker run -v ${PWD}:/data charmdemo:v1 
+docker run -v "${PWD}/results:/data qfedemo:v1 
 ````
-
-## Notes
-
-Only quadratic functions that represent billinear forms are supported.
-<https://chatgpt.com/share/6749fede-fe00-8004-8f13-5fd2a755ea08>
-
-Benchmarking
--> First we tried by increasing the k value
--> Then we had a look at the graphs and saw that in the beginning there were spikes in the setup and keygen method that we assume are because the group gets initialized new for every new k
--> We tougth about fixing the group and its elements to have a more clear benchmark
