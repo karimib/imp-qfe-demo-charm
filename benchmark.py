@@ -86,9 +86,9 @@ def simulation_fixed_vectors():
         s_ct = size_in_kilobits(CT_xy)
         s_sk = size_in_kilobits(skF)
 
-        expected = G.get_expected_result(p, x, F, y)
-        print("expected result: ", expected)
-        print("calculated result: ", v)
+        #expected = G.get_expected_result(p, x, F, y)
+        #print("expected result: ", expected)
+        #print("calculated result: ", v)
 
         results.append(
             [
@@ -110,7 +110,7 @@ def simulation_fixed_vectors():
             ]
         )
 
-    with open("data/qfe_benchmark_fixed_vectors_sizes.csv", "w", newline="") as csvfile:
+    with open("data/qfe_benchmark_fixed_vectors_sizes_2.csv", "w", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(
             [
@@ -223,6 +223,6 @@ def simulation_fixed_k():
         csvwriter.writerows(results)
 
 
-#simulation_fixed_vectors()
+simulation_fixed_vectors()
 #simulation_fixed_k()
-implementation_check()
+#implementation_check()
