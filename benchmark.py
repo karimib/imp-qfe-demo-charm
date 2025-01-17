@@ -51,7 +51,7 @@ def simulation_fixed_vectors():
     x_max = 3
     y_max = 2
     F_max = 2
-    for k in range(3, 100):
+    for k in range(3, 65):
         m = k
         n = k - 1
         x = random_vector(1, x_max, n)
