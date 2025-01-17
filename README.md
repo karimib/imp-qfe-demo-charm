@@ -40,5 +40,5 @@ docker run qfedemo:v1
 Mount a volume to save benchmark csv
 
 ````shell
-docker run -v "${PWD}/results:/data qfedemo:v1 
+docker run -v "${PWD}/results:/data" qfedemo:v1 
 ````
