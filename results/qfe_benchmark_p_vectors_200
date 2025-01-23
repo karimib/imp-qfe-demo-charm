@@ -1,0 +1,2 @@
+k,m,n,x_max,y_max,F_max,size msk,size mpk,size ct,size sk,time setup,time keygen,time encrypt,time decrypt,time total
+200,200,199,2,2,2,0.4375,0.4375,0.4375,0.4375,72114706.03942871,3288557291.030884,1043239355.0872803,29309067487.716675,33712978839.874268
