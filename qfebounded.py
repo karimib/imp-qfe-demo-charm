@@ -153,9 +153,6 @@ class QFE:
 
 
         CT_xy = CTXY(c, c_tilde)
-        #CT_xy_g = CTXY(c, c_tilde)
-        print("c: ", c)
-        print("c_tilde: ", c_tilde)
         CT_xy_g = CTXY(apply_to_matrix(c, self.g1), apply_to_matrix(c_tilde, self.g2))
         return CT_xy, CT_xy_g
 
