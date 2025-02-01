@@ -4,7 +4,10 @@ import csv
 from qfehelpers import (
     random_vector,
     random_int_matrix,
-    size_in_kilobits,
+    mpk_size,
+    msk_size,
+    ct_size,
+    sk_size
 )
 from qfebounded import QFE
 
@@ -35,14 +38,24 @@ def implementation_check():
     y = [1, 2, 3]
     F = [[1, 2, 3], [1, 2, 3]]
 
-    mpk, msk = G.setup(p, k)
+    mpk, msk, mpk_g = G.setup(p, k)
     skF = G.keygen(p, mpk, msk, F)
-    CT_xy = G.encrypt(msk, x, y)
+    CT_xy, CT_xy_g = G.encrypt(msk, x, y)
     v = G.decrypt(p, mpk, skF, CT_xy, n, m, F)
+
+    s_mpk = mpk_size(group, mpk_g) / 1024
+    s_msk = msk_size(group, msk) / 1024
+    s_ct = ct_size(group, CT_xy_g) / 1024
+    s_sk = sk_size(group, skF) / 1024
 
     expected = G.get_expected_result(p, x, F, y)
     print("expected result: ", expected)
     print("calculated result: ", v)
+
+    print("size msk: ", s_msk, "KB")
+    print("size mpk: ", s_mpk, "KB")
+    print("size ct: ", s_ct, "KB")
+    print("size sk: ", s_sk, "KB")
 
 
 # Simulation with fixed vectors of length m and n where the values of the vectors are between 1 and 3 and k is varied
@@ -60,7 +73,7 @@ def simulation_fixed_vectors():
         p = p_order
 
         start_time = time.time()
-        mpk, msk = G.setup(p, k)
+        mpk, msk, mpk_g = G.setup(p, k)
         setup_time = time.time() - start_time
 
         start_time = time.time()
@@ -68,7 +81,7 @@ def simulation_fixed_vectors():
         keygen_time = time.time() - start_time
 
         start_time = time.time()
-        CT_xy = G.encrypt(msk, x, y)
+        CT_xy, CT_xy_g = G.encrypt(msk, x, y)
         encrypt_time = time.time() - start_time
 
         start_time = time.time()
@@ -81,10 +94,10 @@ def simulation_fixed_vectors():
         decrypt_time *= 1_000_000_000
         total_time = setup_time + keygen_time + encrypt_time + decrypt_time
 
-        s_msk = size_in_kilobits(msk)
-        s_mpk = size_in_kilobits(mpk)
-        s_ct = size_in_kilobits(CT_xy)
-        s_sk = size_in_kilobits(skF)
+        s_mpk = mpk_size(group, mpk_g) / 1024
+        s_msk = msk_size(group, msk) / 1024
+        s_ct = ct_size(group, CT_xy_g) / 1024
+        s_sk = sk_size(group, skF) / 1024
 
         expected = G.get_expected_result(p, x, F, y)
         print("expected result: ", expected)
@@ -149,7 +162,7 @@ def simulation_fixed_k():
         p = p_order
 
         start_time = time.time()
-        mpk, msk = G.setup(p, k)
+        mpk, msk, mpk_g = G.setup(p, k)
         setup_time = time.time() - start_time
 
         start_time = time.time()
@@ -157,7 +170,7 @@ def simulation_fixed_k():
         keygen_time = time.time() - start_time
 
         start_time = time.time()
-        CT_xy = G.encrypt(msk, x, y)
+        CT_xy, CT_xy_g = G.encrypt(msk, x, y)
         encrypt_time = time.time() - start_time
 
         start_time = time.time()
@@ -170,10 +183,10 @@ def simulation_fixed_k():
         decrypt_time *= 1_000_000_000
         total_time = setup_time + keygen_time + encrypt_time + decrypt_time
 
-        s_msk = size_in_kilobits(msk)
-        s_mpk = size_in_kilobits(mpk)
-        s_ct = size_in_kilobits(CT_xy)
-        s_sk = size_in_kilobits(skF)
+        s_mpk = mpk_size(group, mpk_g) / 1024
+        s_msk = msk_size(group, msk) / 1024
+        s_ct = ct_size(group, CT_xy_g) / 1024
+        s_sk = sk_size(group, skF) / 1024
 
         expected = G.get_expected_result(p, x, F, y)
         print("expected result: ", expected)
