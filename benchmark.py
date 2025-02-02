@@ -64,7 +64,7 @@ def simulation_fixed_vectors():
     x_max = 3
     y_max = 2
     F_max = 2
-    for k in range(3, 100):
+    for k in range(3, 65):
         m = k
         n = k - 1
         x = random_vector(1, x_max, n)
@@ -99,9 +99,9 @@ def simulation_fixed_vectors():
         s_ct = ct_size(group, CT_xy_g) / 1024
         s_sk = sk_size(group, skF) / 1024
 
-        expected = G.get_expected_result(p, x, F, y)
-        print("expected result: ", expected)
-        print("calculated result: ", v)
+        #expected = G.get_expected_result(p, x, F, y)
+        #print("expected result: ", expected)
+        #print("calculated result: ", v)
 
         results.append(
             [
@@ -123,7 +123,7 @@ def simulation_fixed_vectors():
             ]
         )
 
-    with open("data/qfe_benchmark_fixed_vectors_sizes.csv", "w", newline="") as csvfile:
+    with open("data/qfe_benchmark_fixed_vectors_sizes_2.csv", "w", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(
             [
