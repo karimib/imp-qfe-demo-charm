@@ -241,7 +241,9 @@ def simulation_message_length():
     x_max = 2
     y_max = 2
     F_max = 2
-    for k in range(2,65):
+    length = [100, 200]
+    #for k in range(3,65):
+    for k in length: 
         m = k
         n = k - 1
         x = random_vector(1, x_max, n)
@@ -276,9 +278,9 @@ def simulation_message_length():
         s_ct = ct_size(group, CT_xy_g) / 1024
         s_sk = sk_size(group, skF) / 1024
 
-        expected = G.get_expected_result(p, x, F, y)
-        print("expected result: ", expected)
-        print("calculated result: ", v)
+        #expected = G.get_expected_result(p, x, F, y)
+        #print("expected result: ", expected)
+        #print("calculated result: ", v)
 
         results.append(
             [
