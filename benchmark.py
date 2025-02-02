@@ -241,8 +241,7 @@ def simulation_message_length():
     x_max = 2
     y_max = 2
     F_max = 2
-    length = [100, 200]
-    for k in length:
+    for k in range(2,65):
         m = k
         n = k - 1
         x = random_vector(1, x_max, n)
@@ -328,5 +327,4 @@ def simulation_message_length():
 #simulation_fixed_vectors()
 #simulation_fixed_k()
 #implementation_check()
-
 simulation_message_length()
