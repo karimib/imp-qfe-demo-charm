@@ -283,7 +283,10 @@ def matrix_vector_multiply_mod(matrix, vector, p):
             "Number of columns in the matrix must match the length of the vector"
         )
 
-    result = matrix_vector_multiply(matrix, vector) % p
+    result = [
+        sum(matrix[i][j] * vector[j] for j in range(len(vector))) % p
+        for i in range(len(matrix))
+    ]
     return result
 
 
@@ -470,18 +473,136 @@ def scalar_multiply(vector, scalar):
     """
     return [scalar * element for element in vector]
 
-
-def size_in_kilobits(parameter):
+def scalar_multiply_mod(vector, scalar, p):
     """
-    Calculate the size of a parameter in kilobits.
+    Computes the dot product of two matrices.
 
     Args:
-    parameter: The parameter whose size is to be calculated
+        vector (list[float]): The vector .
+        scalar (int): The scalar.
 
     Returns:
-    float: Size of the parameter in kilobits
+        list[float]: The resulting vector after multiplication with the scalar.
     """
-    size_in_bytes = sys.getsizeof(parameter)
-    size_in_bits = size_in_bytes * 8
-    size_in_kilobits = size_in_bits / 1024
-    return size_in_kilobits
+    return [(scalar * element) % p for element in vector]
+
+
+def apply_to_matrix(matrix, g):
+    """
+    Applies a function to every element in a matrix.
+
+    Args:
+        matrix (list of list of any): The input matrix.
+        func (callable): A function to apply to each element of the matrix.
+
+    Returns:
+        list of list of any: A new matrix with the function applied to each element.
+    """
+    return [[g**value for value in row] for row in matrix]
+
+def apply_to_vector(vector, g):
+    """
+    Applies a function to every element in a matrix.
+
+    Args:
+        matrix (list of list of any): The input matrix.
+        func (callable): A function to apply to each element of the matrix.
+
+    Returns:
+        list of list of any: A new matrix with the function applied to each element.
+    """
+    return [g**value for value in vector]
+
+
+def bit_size_value(value):
+    """
+    Computes the bit size of a value.
+
+    Args:
+        value (int): The input value.
+
+    Returns:
+        int: The bit size of the value.
+    """
+    return value.bit_length()
+
+
+def bit_size_matrix(matrix):
+    """
+    Applies a function to every element in a matrix.
+
+    Args:
+        matrix (list of list of any): The input matrix.
+        func (callable): A function to apply to each element of the matrix.
+
+    Returns:
+        list of list of any: A new matrix with the function applied to each element.
+    """
+    sum = 0
+    for row in matrix:
+        for value in row:
+            sum += value.bit_length()
+    
+    return sum
+
+def bit_size_vector(vector):
+    """
+    Applies a function to every element in a vector.
+
+    Args:
+        vector (list of any): The input vector.
+        func (callable): A function to apply to each element of the vector.
+
+    Returns:
+        list of any: A new vector with the function applied to each element.
+    """
+    sum = 0
+    for value in vector:
+        sum += value.bit_length()
+    
+    return sum
+
+# Compute size of group element encoded as base64
+# Source: https://stackoverflow.com/questions/46832402/how-can-i-compute-the-size-in-bits-of-group-elements-in-charm-crypto
+def compute_bitsize(base64_input):
+    b_padded = base64_input.split(str.encode(":"))[1]
+    pad_size = b_padded.count(str.encode("="))
+    b_len_without_pad = len(b_padded)-4
+    byte_len = (b_len_without_pad *3)/4 +(3-pad_size)-1
+    bit_len = byte_len * 8
+    return bit_len
+
+def bit_size_value_group(group, value):
+    b64value = group.serialize(value)
+    return compute_bitsize(b64value)
+
+def bit_size_matrix_group(group, matrix):
+    sum = 0
+    for row in matrix:
+        for value in row:
+            b64value = group.serialize(value)
+            sum += compute_bitsize(b64value)
+
+    return sum
+
+
+def bit_size_vector_group(group, vector):
+    sum = 0
+    for value in vector:
+        b64value = group.serialize(value)
+        sum += compute_bitsize(b64value)
+
+    return sum
+
+
+def mpk_size(group, mpk):
+    return bit_size_value_group(group, mpk.g1) + bit_size_value_group(group, mpk.g2) + bit_size_value_group(group, mpk.gt) + bit_size_value_group(group, mpk.baT)
+
+def msk_size(group, msk):
+    return bit_size_matrix(msk.A) + bit_size_vector(msk.a) + bit_size_matrix(msk.B) + bit_size_vector(msk.b) + bit_size_matrix(msk.r) + bit_size_matrix(msk.s)
+
+def sk_size(group, skf):
+    return bit_size_value_group(group, skf.K) + bit_size_value_group(group, skf.K_tilde)
+
+def ct_size(group, ct):
+    return bit_size_matrix_group(group, ct.c) + bit_size_matrix_group(group, ct.c_tilde)

@@ -12,6 +12,10 @@ from qfehelpers import (
     vector_transposed_mul_matrix_mul_vector,
     dot_product,
     scalar_multiply,
+    apply_to_matrix,
+    apply_to_vector,
+    matrix_vector_multiply_mod,
+    scalar_multiply_mod,
     MPK,
     MSK,
     SKF,
@@ -96,9 +100,10 @@ class QFE:
 
         # master public key (TODO: is this always gt^1 ?)
         mpk = MPK(self.g1, self.g2, self.gt, inner_product_mod(b, a, p))
+        mpk_g = MPK(self.g1, self.g2, self.gt, self.gt ** inner_product_mod(b, a, p))
         # master secret key
         msk = MSK(A, a, B, b, r, s)
-        return mpk, msk
+        return mpk, msk, mpk_g
 
     def keygen(self, p=p_order, mpk=None, msk=None, F=None):
         # Generate random element u <- Z_p
@@ -138,16 +143,18 @@ class QFE:
 
         # Compute c and c_tilde
         c = [
-            matrix_vector_multiply(A, r[i]) + scalar_multiply(b, x[i])
+            matrix_vector_multiply_mod(A, r[i], self.p_order) + scalar_multiply_mod(b, x[i], self.p_order)
             for i in range(len(x))
         ]
         c_tilde = [
-            matrix_vector_multiply(B, s[j]) + scalar_multiply(a, y[j])
+            matrix_vector_multiply_mod(B, s[j], self.p_order) + scalar_multiply_mod(a, y[j], self.p_order)
             for j in range(len(y))
         ]
 
+
         CT_xy = CTXY(c, c_tilde)
-        return CT_xy
+        CT_xy_g = CTXY(apply_to_matrix(c, self.g1), apply_to_matrix(c_tilde, self.g2))
+        return CT_xy, CT_xy_g
 
     def decrypt(
         self, p=p_order, mpk=None, skF=None, CT_xy=None, n=None, m=None, F=None
