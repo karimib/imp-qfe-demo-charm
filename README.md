@@ -6,6 +6,12 @@ The following project implements the bounded Quadratic Functional Encryption Sch
 
 * [Practical Functional Encryption for Quadratic Functions with Applications to Predicate Encryption](https://eprint.iacr.org/2017/151.pdf)
 
+## Disclaimer:
+Disclaimer
+The code provided is for educational and research purposes only. It has not been reviewed, tested, or verified for security, reliability, or suitability in any environment. The code MUST NOT be used in production systems or for any purpose where failure, errors, or vulnerabilities could cause harm or damage.
+
+The authors and contributors make no warranties or guarantees, express or implied, regarding the code, including but not limited to its correctness, safety, or fitness for any particular purpose. All use of this code is at your own risk. The authors explicitly disclaim any and all liability for direct, indirect, incidental, or consequential damages arising from the use, misuse, or inability to use the code.
+
 ## Structure
 
 * [qfebounded.py](./qfebounded.py) contains the implementation of the scheme
